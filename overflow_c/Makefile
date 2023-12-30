@@ -1,12 +1,12 @@
-CXX =  clang
-LD  =  clang
+CXX =  gcc
+LD  =  gcc
 
 CCFLAGS  = -std=c2x
 CCFLAGS += -Wall
 CCFLAGS += -o3
 
 
-all: main
+all: clean main
 
 main:
 	$(LD) -o main main.c
@@ -15,5 +15,4 @@ run: all
 	./main
 
 clean:
-	rm ./main
-	clear
+	rm -f ./main

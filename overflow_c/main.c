@@ -46,9 +46,14 @@ int main_auth(void){
     *strstr(b_pointer, "\n") = '\0';
     puts(b_pointer);
 
-    char bearer_token[BEARER_LEN] = {0};
     int is_authorized = 0;
+    char bearer_token[BEARER_LEN] = {0};
     memcpy(bearer_token, b_pointer, strlen(b_pointer));
+
+    printf("%d\n", is_authorized);
+    printf("%p\n", (void *) &is_authorized);
+    printf("%p\n", (void *) &bearer_token[0]);
+    printf("%p\n", (void *) &bearer_token[BEARER_LEN -1]);
 
     if (is_authorized == 0){
         puts("Niet authorized\n");
@@ -257,3 +262,7 @@ int accept_client(int fd_server){
     }
     return fd_client;
 }
+
+/* 056 */
+/* 105 */
+/* 108 */
