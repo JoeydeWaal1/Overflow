@@ -2,8 +2,8 @@ CXX =  gcc
 LD  =  gcc
 
 CCFLAGS  = -std=c2x
-CCFLAGS += -Wall
-CCFLAGS += -o3
+# CCFLAGS += -Wall
+# CCFLAGS += -o3
 
 
 all: clean main
