@@ -7,62 +7,93 @@
 #define PORT    8081
 #define BUF_LEN 1024
 #define CONTENT_LEN "Content-Length: "
+#define BEARER      "Bearer "
+#define BEARER_LEN  50
 
 int create_server();
 int get_header_end(char* buffer, int einde);
 int get_multipart_start(char* buffer, int einde);
 int get_multipart_end(char* buffer, int einde);
 int main_multipart(void);
-int main_malloc(void);
+int main_auth(void);
+int send_ok(int fd);
+int send_unauthorized(int fd);
+int accept_client(int fd_server);
 
 int main(void) {
     /* main_multipart(); */
-    main_malloc();
+    main_auth();
 }
 
 
-int main_malloc(void){
+int main_auth(void){
     int fd_server, fd_client;
     char buffer[BUF_LEN] = { 0 };
 
+    // server socket maken
     fd_server = create_server();
 
-    struct sockaddr_in address;
-    socklen_t addrlen = sizeof(address);
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(PORT);
+    // client sockt accepteren
+    fd_client = accept_client(fd_server);
 
-    puts("Listening...");
-    int result  = fd_client = accept(fd_server, (struct sockaddr*)&address, &addrlen);
-    if (result < 0) {
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
     puts("---\tHeb client\t---");
 
     // headers
     int len = read(fd_client, buffer, BUF_LEN - 2);
     buffer[BUF_LEN - 1] = 0;
-    int einde = get_header_end(buffer, len);
-    buffer[einde] = 0;
+
+    char* b_pointer = strstr(buffer, BEARER) + strlen(BEARER);
+    *strstr(b_pointer, "\n") = '\0';
+    puts(b_pointer);
+
+    char bearer_token[BEARER_LEN] = {0};
+    int is_authorized = 0;
+    memcpy(bearer_token, b_pointer, strlen(b_pointer));
+
+    if (is_authorized == 0){
+        puts("Niet authorized\n");
+    } else {
+        puts("Authorized\n");
+    }
+
+
+
+    puts(buffer);
+    puts(b_pointer);
+    puts(bearer_token);
 
 
     // parse content length
-    const char* content_lenth_str = strstr(buffer, CONTENT_LEN) + strlen(CONTENT_LEN);
-    *strstr(content_lenth_str, "\n") = '\0';
-    int content_len = atoi(content_lenth_str);
+    /* const char* content_lenth_str = strstr(buffer, CONTENT_LEN) + strlen(CONTENT_LEN); */
+    /* *strstr(content_lenth_str, "\n") = '\0'; */
+    /* int content_len = atoi(content_lenth_str); */
 
-    printf("content-len: %d\n", content_len);
+    /* printf("content-len: %d\n", content_len); */
 
-    char* heap_buffer = malloc(content_len);
+    /* char* heap_buffer = malloc(content_len); */
 
-    printf("---\tEinde: %d\t---\n", einde);
-    printf("---\tLen %d\t\t---\n", len);
+    /* printf("---\tEinde: %d\t---\n", einde); */
+    /* printf("---\tLen %d\t\t---\n", len); */
 
+    /* send_ok(fd_client); */
+    send_unauthorized(fd_client);
     close(fd_client);
     close(fd_server);
 
+    return 0;
+}
+
+int send_ok(int fd){
+    char* response = "HTTP/1.1 200 OK\r\n\r\n";
+    int resp = write(fd, response, strlen(response));
+    /* printf("%d\n",resp); */
+    return 0;
+}
+
+int send_unauthorized(int fd){
+    char* response = "HTTP/1.1 401 Unauthorized\r\n\r\n";
+    int resp = write(fd, response, strlen(response));
+    /* printf("%d\n",resp); */
     return 0;
 }
 
@@ -79,7 +110,7 @@ int main_multipart(void) {
     address.sin_port = htons(PORT);
 
     puts("Listening...");
-    int result  = fd_client = accept(fd_server, (struct sockaddr*)&address, &addrlen);
+    int result = fd_client = accept(fd_server, (struct sockaddr*)&address, &addrlen);
     if (result < 0) {
         perror("accept");
         exit(EXIT_FAILURE);
@@ -185,6 +216,11 @@ int create_server() {
         exit(1);
     }
 
+    if (setsockopt(fd_server, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0){
+        puts("setsockopt(SO_REUSEADDR) failed");
+        exit(1);
+    }
+
     struct sockaddr_in address;
     socklen_t addrlen = sizeof(address);
     address.sin_family = AF_INET;
@@ -203,4 +239,21 @@ int create_server() {
         exit(1);
     }
     return fd_server;
+}
+
+int accept_client(int fd_server){
+    struct sockaddr_in address;
+    int fd_client;
+    socklen_t addrlen = sizeof(address);
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(PORT);
+
+    puts("Listening...");
+    int result = fd_client = accept(fd_server, (struct sockaddr*)&address, &addrlen);
+    if (result < 0) {
+        perror("accept");
+        exit(EXIT_FAILURE);
+    }
+    return fd_client;
 }

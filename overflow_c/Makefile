@@ -3,8 +3,7 @@ LD  =  clang
 
 CCFLAGS  = -std=c2x
 CCFLAGS += -Wall
-# CCFLAGS += -o3
-#
+CCFLAGS += -o3
 
 
 all: main
@@ -17,3 +16,4 @@ run: all
 
 clean:
 	rm ./main
+	clear
