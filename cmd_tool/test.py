@@ -17,4 +17,3 @@ print(len(instructions))
 print(instructions)
 with open("nop", "wb") as f:
     f.write(instructions)
-

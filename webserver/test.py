@@ -11,7 +11,7 @@ result_str = ''.join(random.choice(letters) for i in range(num))
 print("Payload:", result_str)
 
 try:
-    response = r.get("http://localhost:8081", headers={
+    response = r.get("http://localhost:8080", headers={
         "Authorization" : f"Bearer {result_str}"
         })
 except:
