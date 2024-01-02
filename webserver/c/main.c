@@ -114,12 +114,12 @@ int main_auth(void){
     printf("%p\n", (void *) &bearer_token[0]);
     printf("%p\n", (void *) &bearer_token[BEARER_LEN -1]);
 
-    if (is_authorized == true){
-        send_ok(fd_client);
-        puts("Authorized\n");
-    } else {
+    if (is_authorized == false){
         puts("Niet authorized\n");
         send_unauthorized(fd_client);
+    } else {
+        send_ok(fd_client);
+        puts("Authorized\n");
     }
 
     close(fd_client);
